@@ -26,7 +26,7 @@ function buildReactJS() {
     const buildProcess = exec(`cd ${__dirname} && cd ../../../../ && yarn run build`, {
       maxBuffer: 1024 * 1024 * 1024
     });
-    reportToSlack(`build ${process.env.PROJECT_NAME} start ${new Date}`)
+    reportToSlack('build `' + process.env.PROJECT_NAME + '`' + `start ${new Date}`)
     buildProcess.stdout.on('data', data => {
       console.log(`stdout: ${data}`);
     });
