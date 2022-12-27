@@ -1,6 +1,6 @@
 {
   "name": "@chaunnt/reactjs_buildpackageandnotify",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "build reactjs website using yarn and notify (Slack/Telegram) to user when building done",
   "main": "index.js",
   "scripts": {
