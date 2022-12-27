@@ -1,0 +1,30 @@
+{
+  "name": "@chaunnt/reactjs_buildpackageandnotify",
+  "version": "1.0.9",
+  "description": "build reactjs website using yarn and notify (Slack/Telegram) to user when building done",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run reactjs_buildpackageandnotify",
+    "start": "node src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chaunnt/ReactJS_BuildPackageAndNotify.git"
+  },
+  "keywords": [
+    "ReactJS",
+    "Build"
+  ],
+  "author": "ChauNNT",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chaunnt/ReactJS_BuildPackageAndNotify/issues"
+  },
+  "bin": "src/index.js",
+  "homepage": "https://github.com/chaunnt/ReactJS_BuildPackageAndNotify#readme",
+  "dependencies": {
+    "child_process": "^1.0.2",
+    "dotenv": "^16.0.3",
+    "node-slack": "0.0.7"
+  }
+}
