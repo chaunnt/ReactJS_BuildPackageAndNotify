@@ -20,13 +20,32 @@ function reportToSlack(message, attachments) {
   });
 }
 
+function reportToTelegram(message) {
+  const TelegramBot = require('node-telegram-bot-api');
+
+  // replace the value below with the Telegram token you receive from @BotFather
+  const token = process.env.TELEGRAM_BOT_TOKEN || '5812272325:AAGjBDB6Yqxx70sXOG-Y0SuwwxNdDuYgJfM';
+
+  // Create a bot that uses 'polling' to fetch new updates
+  const bot = new TelegramBot(token, {polling: false});
+
+  const chatId = process.env.TELEGRAM_CHAT_ID || '@BuildNotify'
+  bot.sendMessage(chatId, message);
+}
+
 function buildReactJS() {
   try {
     console.log(`execute job ${__dirname}`);
     const buildProcess = exec(`cd ${__dirname} && cd ../../../../ && yarn run build`, {
       maxBuffer: 1024 * 1024 * 1024
     });
-    reportToSlack('build `' + process.env.PROJECT_NAME + '`' + `start ${new Date}`)
+    let _versionBuild = "-";
+    if (process.env.REACT_APP_BUILD_VERSION) {
+      _versionBuild = process.env.REACT_APP_BUILD_VERSION
+    }
+
+    reportToSlack(`build start ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
+    reportToTelegram(`build start ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
     buildProcess.stdout.on('data', data => {
       console.log(`stdout: ${data}`);
     });
@@ -38,14 +57,16 @@ function buildReactJS() {
     buildProcess.on('close', code => {
       console.log(`child process closed with code ${code}`);
       if (code !== 0) {
-        reportToSlack(`build error ${process.env.PROJECT_NAME} start ${new Date}`, [
+        reportToSlack(`build error ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
+        reportToSlack(`build error ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`, [
           {
             "type": "plain_text",
             "text": ":broken_heart:"
           }
         ])
       } else {
-        reportToSlack(`build finish ${process.env.PROJECT_NAME} start ${new Date}, [
+        reportToSlack(`build finish ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
+        reportToSlack(`build finish ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}, [
           {
             "type": "plain_text",
             "text": ":white_check_mark:"
