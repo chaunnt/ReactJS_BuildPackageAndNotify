@@ -14,6 +14,8 @@ SLACK_HOOK_URL=<URL of hook from Slack>
 TELEGRAM_BOT_TOKEN=<BOT TOKEN> 
 #example: @BuildNotify
 TELEGRAM_CHAT_ID=<CHAT ID OR Name>
+#example: 2143124
+PASTE_BIN_API_KEY=<PASTEBIN API KEY>
 ```
 # setup
 install package

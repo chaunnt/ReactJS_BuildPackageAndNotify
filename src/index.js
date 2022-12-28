@@ -3,6 +3,21 @@
 const { execSync, exec } = require('child_process');
 require('dotenv').config();
 
+async function storeLogToPastebin(log) {
+  const { PasteClient, Publicity, ExpireDate } = require("pastebin-api"); // using CommonJS
+
+  // Tip: load dev key from a `.env` file
+  const client = new PasteClient(process.env.PASTE_BIN_API_KEY || "8d4905354da08ff554dfacbc604a0ab5");
+  const url = await client.createPaste({
+    code: log,
+    expireDate: ExpireDate.OneDay,
+    format: "bash",
+    name: "buildlog",
+    publicity: Publicity.Public,
+  });
+  return url;
+}
+
 function reportToSlack(message, attachments) {
   if (!process.env.SLACK_HOOK_URL) {
     return;
@@ -24,7 +39,7 @@ function reportToTelegram(message) {
   const TelegramBot = require('node-telegram-bot-api');
 
   // replace the value below with the Telegram token you receive from @BotFather
-  const token = process.env.TELEGRAM_BOT_TOKEN || '5812272325:AAGjBDB6Yqxx70sXOG-Y0SuwwxNdDuYgJfM';
+  const token = process.env.TELEGRAM_BOT_TOKEN || '5665305274:AAFlhbcpNijafxo9sCNqO2CBuojoRNP5ZFc';
 
   // Create a bot that uses 'polling' to fetch new updates
   const bot = new TelegramBot(token, {polling: false});
@@ -43,35 +58,42 @@ function buildReactJS() {
     if (process.env.REACT_APP_BUILD_VERSION) {
       _versionBuild = process.env.REACT_APP_BUILD_VERSION
     }
-
-    reportToSlack(`build start ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
-    reportToTelegram(`build start ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
+    let _chunkLog = [];
+    // reportToSlack(`build start ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
+    // reportToTelegram(`build start ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
     buildProcess.stdout.on('data', data => {
       console.log(`stdout: ${data}`);
+      _chunkLog.push(data);
     });
 
     buildProcess.stderr.on('message', data => {
       console.error(`stderr: ${data}`);
+      _chunkLog.push(data);
     });
 
+    buildProcess.stderr.on('error', data => {
+      console.error(`stderr error: ${data}`);
+      _chunkLog.push(data);
+    });
+    buildProcess.stdout.on('error', data => {
+      console.error(`stdout error: ${data}`);
+      _chunkLog.push(data);
+    });
     buildProcess.on('close', code => {
       console.log(`child process closed with code ${code}`);
       if (code !== 0) {
-        reportToSlack(`build error ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
-        reportToSlack(`build error ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`, [
-          {
-            "type": "plain_text",
-            "text": ":broken_heart:"
-          }
-        ])
+        _chunkLog = _chunkLog.join('\r\n');
+        storeLogToPastebin(_chunkLog).then((pasteBinLogFileUrl) => {
+          console.log(pasteBinLogFileUrl);
+          reportToSlack(`:broken_heart: build error ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
+          reportToSlack(`See detail error log on ${pasteBinLogFileUrl}`);
+          reportToTelegram(`:broken_heart: build error ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
+          reportToTelegram(`See detail error log on ${pasteBinLogFileUrl}`);
+        });
+        
       } else {
-        reportToSlack(`build finish ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
-        reportToSlack(`build finish ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}, [
-          {
-            "type": "plain_text",
-            "text": ":white_check_mark:"
-          }
-        ]`)
+        reportToSlack(`:white_check_mark: build finish ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
+        reportToTelegram(`:white_check_mark: build finish ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
       }
     });
     buildProcess.on('message', code => {
