@@ -85,15 +85,15 @@ function buildReactJS() {
         _chunkLog = _chunkLog.join('\r\n');
         storeLogToPastebin(_chunkLog).then((pasteBinLogFileUrl) => {
           console.log(pasteBinLogFileUrl);
-          reportToSlack(`:broken_heart: build error ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
+          reportToSlack(`❌ build error ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
           reportToSlack(`See detail error log on ${pasteBinLogFileUrl}`);
-          reportToTelegram(`:broken_heart: build error ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
+          reportToTelegram(`❌ build error ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
           reportToTelegram(`See detail error log on ${pasteBinLogFileUrl}`);
         });
         
       } else {
-        reportToSlack(`:white_check_mark: build finish ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
-        reportToTelegram(`:white_check_mark: build finish ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
+        reportToSlack(`🆗 build finish ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
+        reportToTelegram(`🆗 build finish ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
       }
     });
     buildProcess.on('message', code => {
