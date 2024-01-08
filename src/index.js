@@ -42,15 +42,36 @@ function reportToTelegram(message) {
   const token = process.env.TELEGRAM_BOT_TOKEN || '5665305274:AAFlhbcpNijafxo9sCNqO2CBuojoRNP5ZFc';
 
   // Create a bot that uses 'polling' to fetch new updates
-  const bot = new TelegramBot(token, {polling: false});
+  const bot = new TelegramBot(token, { polling: false });
 
   const chatId = process.env.TELEGRAM_CHAT_ID || '@BuildNotify'
   bot.sendMessage(chatId, message);
 }
 
+function updateEnvVariables(filePath) {
+  // Import the filesystem module 
+  const fs = require('fs');
+
+  let _envVariables = Object.keys(process.env);
+  let _envDataString = "";
+  for (let i = 0; i < _envVariables.length; i++) {
+    const _variableData = _envVariables[i];
+    _envDataString += `${_variableData}=${process.env[_variableData]}`
+    _envDataString += '\r\n'
+  }
+  try {
+    fs.appendFileSync(filePath, _envDataString);
+  } catch (error) {
+    if (error) {
+      console.error(`updateEnvVariables ERROR`)
+      console.error(error);
+    }
+  }
+}
 function buildReactJS() {
   try {
     console.log(`execute job ${__dirname}`);
+    updateEnvVariables('.env');
     const buildProcess = exec(`cd ${__dirname} && cd ../../../../ && yarn run build`, {
       maxBuffer: 1024 * 1024 * 1024
     });
@@ -59,8 +80,8 @@ function buildReactJS() {
       _versionBuild = process.env.REACT_APP_BUILD_VERSION
     }
     let _chunkLog = [];
-    // reportToSlack(`build start ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
-    // reportToTelegram(`build start ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
+    // reportToSlack(`build start ${process.env.REACT_APP_PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
+    reportToTelegram(`build start ${process.env.REACT_APP_PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
     buildProcess.stdout.on('data', data => {
       console.log(`stdout: ${data}`);
       _chunkLog.push(data);
@@ -85,15 +106,15 @@ function buildReactJS() {
         _chunkLog = _chunkLog.join('\r\n');
         storeLogToPastebin(_chunkLog).then((pasteBinLogFileUrl) => {
           console.log(pasteBinLogFileUrl);
-          reportToSlack(`❌ build error ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
+          reportToSlack(`❌ build error ${process.env.REACT_APP_PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
           reportToSlack(`See detail error log on ${pasteBinLogFileUrl}`);
-          reportToTelegram(`❌ build error ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
+          reportToTelegram(`❌ build error ${process.env.REACT_APP_PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
           reportToTelegram(`See detail error log on ${pasteBinLogFileUrl}`);
         });
-        
+
       } else {
-        reportToSlack(`🆗 build finish ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
-        reportToTelegram(`🆗 build finish ${process.env.PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
+        reportToSlack(`🆗 build finish ${process.env.REACT_APP_PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
+        reportToTelegram(`🆗 build finish ${process.env.REACT_APP_PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
       }
     });
     buildProcess.on('message', code => {
