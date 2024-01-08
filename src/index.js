@@ -49,36 +49,44 @@ function reportToTelegram(message) {
 }
 
 function updateEnvVariables(filePath) {
+  console.info(`updateEnvVariables ${filePath}`)
   // Import the filesystem module 
   const fs = require('fs');
   const moment = require('moment');
-  let _envVariables = Object.keys(process.env);
+  let _envVariables = process.env;
+  _envVariables[REACT_APP_BUILD_VERSION] =`${moment().format('YYYYMMDDHHmm')}`;
+
+  let _envVariablesKeyList = Object.keys(_envVariables);
+
   let _envDataString = "";
-  for (let i = 0; i < _envVariables.length; i++) {
+  for (let i = 0; i < _envVariablesKeyList.length; i++) {
     const _variableData = _envVariables[i];
-    _envDataString += `${_variableData}=${process.env[_variableData]}`
+    _envDataString += `${_variableData}=${_envVariables[_variableData]}`
     _envDataString += '\r\n'
   }
   try {
     fs.appendFileSync(filePath, _envDataString);
-    fs.appendFileSync(filePath, `REACT_APP_BUILD_VERSION=${moment().format('YYYYMMDDHHmm')}\r\n`);
   } catch (error) {
     if (error) {
       console.error(`updateEnvVariables ERROR`)
       console.error(error);
     }
   }
+  return _envVariables;
 }
 function buildReactJS() {
   try {
     console.log(`execute job ${__dirname}`);
-    updateEnvVariables('.env');
+    let _envVariables = updateEnvVariables('../../../../.env');
     const buildProcess = exec(`cd ${__dirname} && cd ../../../../ && yarn run build`, {
       maxBuffer: 1024 * 1024 * 1024
     });
     let _versionBuild = "-";
     if (process.env.REACT_APP_BUILD_VERSION) {
       _versionBuild = process.env.REACT_APP_BUILD_VERSION
+    }
+    if (_envVariables[`REACT_APP_BUILD_VERSION`]) {
+      _versionBuild = _envVariables[`REACT_APP_BUILD_VERSION`]
     }
     let _chunkLog = [];
     // reportToSlack(`build start ${process.env.REACT_APP_PROJECT_NAME} - version ${_versionBuild} at ${new Date}`);
