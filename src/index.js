@@ -51,7 +51,7 @@ function reportToTelegram(message) {
 function updateEnvVariables(filePath) {
   // Import the filesystem module 
   const fs = require('fs');
-
+  const moment = require('moment');
   let _envVariables = Object.keys(process.env);
   let _envDataString = "";
   for (let i = 0; i < _envVariables.length; i++) {
@@ -61,6 +61,7 @@ function updateEnvVariables(filePath) {
   }
   try {
     fs.appendFileSync(filePath, _envDataString);
+    fs.appendFileSync(filePath, `REACT_APP_BUILD_VERSION=${moment().format('YYYYMMDDHHmm')}\r\n`);
   } catch (error) {
     if (error) {
       console.error(`updateEnvVariables ERROR`)
