@@ -1,6 +1,6 @@
 {
   "name": "@chaunnt/reactjs_buildpackageandnotify",
-  "version": "1.0.22",
+  "version": "1.0.23",
   "description": "build reactjs website using yarn and notify (Slack/Telegram) to user when building done",
   "main": "index.js",
   "scripts": {
@@ -25,6 +25,7 @@
   "dependencies": {
     "child_process": "^1.0.2",
     "dotenv": "^16.0.3",
+    "moment": "^2.30.1",
     "node-slack": "0.0.7",
     "node-telegram-bot-api": "^0.60.0",
     "pastebin-api": "^5.1.5"
