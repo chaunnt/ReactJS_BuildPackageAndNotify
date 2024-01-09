@@ -54,15 +54,20 @@ function updateEnvVariables(filePath) {
   const fs = require('fs');
   const moment = require('moment');
   let _envVariables = process.env;
-  _envVariables[REACT_APP_BUILD_VERSION] =`${moment().format('YYYYMMDDHHmm')}`;
+  console.log(process.env);
+  _envVariables[`REACT_APP_BUILD_VERSION`] =`${moment().format('YYYYMMDDHHmm')}`;
 
   let _envVariablesKeyList = Object.keys(_envVariables);
 
   let _envDataString = "";
   for (let i = 0; i < _envVariablesKeyList.length; i++) {
-    const _variableData = _envVariables[i];
-    _envDataString += `${_variableData}=${_envVariables[_variableData]}`
-    _envDataString += '\r\n'
+    const _variableName = _envVariablesKeyList[i];
+    const regex = /([A-Z_][^a-z(__)]\w+)/g;
+    const found = _variableName.match(regex);
+    if (found !== null) {
+      _envDataString += `${_variableName}=${_envVariables[_variableName]}`
+      _envDataString += '\r\n'
+    }
   }
   try {
     fs.appendFileSync(filePath, _envDataString);
@@ -77,7 +82,7 @@ function updateEnvVariables(filePath) {
 function buildReactJS() {
   try {
     console.log(`execute job ${__dirname}`);
-    let _envVariables = updateEnvVariables('../../../../.env');
+    let _envVariables = updateEnvVariables('.env');
     const buildProcess = exec(`cd ${__dirname} && cd ../../../../ && yarn run build`, {
       maxBuffer: 1024 * 1024 * 1024
     });
