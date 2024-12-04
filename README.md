@@ -28,5 +28,5 @@ add this command to your `package.json`
   },
 ```
 # sample 
-run command `yarn autobuild`
+run command `npm run autobuild`
 

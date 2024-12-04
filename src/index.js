@@ -83,7 +83,7 @@ function buildReactJS() {
   try {
     console.log(`execute job ${__dirname}`);
     let _envVariables = updateEnvVariables('.env');
-    const buildProcess = exec(`cd ${__dirname} && cd ../../../../ && yarn run build`, {
+    const buildProcess = exec(`cd ${__dirname} && cd ../../../../ && npm run build`, {
       maxBuffer: 1024 * 1024 * 1024
     });
     let _versionBuild = "-";
